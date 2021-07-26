@@ -112,7 +112,15 @@ if __name__ == '__main__':
 
         for i in range(len(column_keys)):                                                   # this stores the normalized JSON data into a list of lists.
             
-            new_data = ''.join(str(e) for e in (normalized_data[column_keys[i]].values))
+            try:
+
+                new_data = ''.join(str(e) for e in (normalized_data[column_keys[i]].values))
+
+            except: 
+
+                new_data = ""
+
+                continue
 
             list_of_lists[i].append(new_data)
         
@@ -135,12 +143,12 @@ if __name__ == '__main__':
 
     drop_list = []
 
-    for i in range(len(csv_df.index)):                                                      # if the script ended prematurely, drop every phone numbers that were not used
+##    for i in range(len(csv_df.index)):                                                      # if the script ended prematurely, drop every phone numbers that were not used
         
-        if i > counter-1:
-            drop_list.append(i)
+##        if i > counter-1:
+##            drop_list.append(i)
 
-    csv_df = csv_df.drop(drop_list)
+##    csv_df = csv_df.drop(drop_list)
 
     for i in range(len(list_of_lists)):                                                     # this populates the actual json data into each column
         csv_df[column_keys[i]] = list_of_lists[i]
