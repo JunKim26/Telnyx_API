@@ -1,4 +1,4 @@
-# Title : Telnyx API Program
+# Title : Telnyx Lookup
 # Author: Jun Kim
 # Date: 07/16/2021
 # Description: In this program, tkinter will be used to prompt a user to choose a csv file that contains phone numbers with the column name "Phone". 
@@ -22,7 +22,7 @@ import time                                                                     
 if __name__ == '__main__':
 
 # =======================================================================================================================================================
-#                                                               Script lines for Tkinter GUI
+#                                                           Script lines for Tkinter GUI
 # =======================================================================================================================================================
 
     window = tk.Tk()                                                                        # creates a tkinter object
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     window.mainloop()                                                                       # tells Python to run the Tkinter event loop
 
 # =======================================================================================================================================================
-#                                                       Section to send API request and collect JSON data
+#                                                   Section to send API request and collect JSON data
 # =======================================================================================================================================================
 
     column_keys = []                                                                        # this list will be used to contain the column_keys from the JSON file
@@ -77,7 +77,6 @@ if __name__ == '__main__':
 
             try:
                 res = requests.get('https://api.telnyx.com/anonymous/v2/number_lookup/'+input_number)  # sends API request using the standardized phone number
-
                 normalized_data = pd.json_normalize(res.json())   
 
             except:
@@ -85,46 +84,37 @@ if __name__ == '__main__':
                 time.sleep(65)
                 continue                 
 
-            break                                                         
-
-        if error_counter == 10:                                                             # break out of the for-loop if a phone number in all the phone number has failed
-
             break
 
-        counter += 1                                                                        # add 1 to the counter tha counts the number of phone numbers finished
-
-        if counter%10 == 0:                                                                 # API limit is 10 per minute, so wait 63 seconds after every 10 numbers
-
-            print(str(counter) + ' Finished')
-            time.sleep(63)                                                                  
+        if error_counter == 10:                                                             # break out of the for-loop if a phone number in all the phone number has failed
+            break
         
-        if first == True:                                                                   # this is done to set the column_keys and populate list_of_lists
+        if first == True:                                                                   # this is done to set the column_keys and populate list_of_lists on first iteration
 
             for column_name in normalized_data:
 
                 column_keys.append(column_name)
-
                 column_list = []
-                
                 list_of_lists.append(column_list)
-
                 first = False
 
         for i in range(len(column_keys)):                                                   # this stores the normalized JSON data into a list of lists.
             
             try:
-
                 new_data = ''.join(str(e) for e in (normalized_data[column_keys[i]].values))
 
             except: 
-
-                new_data = ""
-
-                continue
+                new_data = "N/A"
 
             list_of_lists[i].append(new_data)
         
         error_counter = 0
+
+        counter += 1                                                                        # add 1 to the counter tha counts the number of phone numbers finished
+
+        if counter%10 == 0:                                                                 # API limit is 10 per minute, so wait 63 seconds after every 10 numbers
+            print(str(counter) + ' Finished')
+            time.sleep(63)         
 
 # =======================================================================================================================================================
 #                                                               Creating Output File
@@ -135,7 +125,7 @@ if __name__ == '__main__':
 
     extension = '.csv'                                          
 
-    file_name = dt_string +" "+ "telynyx_result" + extension                                # sets the file name 
+    file_name = dt_string +" "+ "telynyx_result"+ str(counter) + extension                  # sets the file name 
 
     script_dir = os.path.dirname(__file__)                                                  # absolute directory the script is in
     rel_path = 'Output'
@@ -143,12 +133,11 @@ if __name__ == '__main__':
 
     drop_list = []
 
-##    for i in range(len(csv_df.index)):                                                      # if the script ended prematurely, drop every phone numbers that were not used
-        
-##        if i > counter-1:
-##            drop_list.append(i)
-
-##    csv_df = csv_df.drop(drop_list)
+    for i in range(len(csv_df.index)):                                                      # if the script ended prematurely, drop every phone numbers that were not used
+        if i > counter-1:
+            drop_list.append(i)
+                                                                 
+    csv_df.drop(drop_list)                                                                  # drops the indexes of phone numbers that were not used
 
     for i in range(len(list_of_lists)):                                                     # this populates the actual json data into each column
         csv_df[column_keys[i]] = list_of_lists[i]
@@ -158,5 +147,4 @@ if __name__ == '__main__':
     with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                    # creates csv to write in
 
         csv_df.to_csv(new_file, index=False)                                                # writes the dataframe into the new file without the indices
-
         csv_file.close()
