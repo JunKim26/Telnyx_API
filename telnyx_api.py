@@ -42,11 +42,48 @@ if __name__ == '__main__':
         csv_df = pd.DataFrame(csv_data)                                                     # creates a pandas dataframe using the input csv file
 
         end_button = Button(window, text = 'Create', command =window.destroy).pack()        # button to close tkinter window
-
                                                                     
     csv_button = Button(window, text = 'Open CSV File', command = csv_opener).pack()
 
     window.mainloop()                                                                       # tells Python to run the Tkinter event loop
+
+# =======================================================================================================================================================
+#                                                               Creating Output File
+# =======================================================================================================================================================
+
+
+    def output_creator():
+
+        dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                   # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
+        dt_string = str(dt)                                                                 # string of date and time
+                    
+        last_path = os.path.basename(os.path.normpath(csv_file.name))                       # grabs the title of the csv file             
+
+        file_name = dt_string +" Count_"+str(counter)+" "+last_path                         # sets the file name 
+
+        script_dir = os.path.dirname(__file__)                                              # absolute directory the script is in
+        rel_path = 'Output'
+        abs_file_path = os.path.join(script_dir, rel_path)                                  # this joins the absolute path of current script with wanted relative path
+
+        drop_list = []
+
+        csv_df_copy = csv_df.copy(deep=True)
+
+        for i in range(len(csv_df_copy.index)):                                             # drop every phone numbers that were not used
+            if i > counter-1:
+                drop_list.append(i)
+
+        csv_df_copy = csv_df_copy.drop(drop_list)                                           # drops the indexes of phone numbers that were not used
+
+        for i in range(len(list_of_lists)):                                                 # this populates the actual json data into each column
+            csv_df_copy[column_keys[i]] = list_of_lists[i]                                                            
+
+        csv_df_copy = csv_df_copy.applymap(str)
+
+        with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                # creates csv to write in
+
+            csv_df_copy.to_csv(new_file, index=False)                                       # writes the dataframe into the new file without the indices
+            csv_file.close()
 
 # =======================================================================================================================================================
 #                                                   Section to send API request and collect JSON data
@@ -75,12 +112,13 @@ if __name__ == '__main__':
             if error_counter == 10:                                     
                 break
 
-            try:
-                res = requests.get('https://api.telnyx.com/anonymous/v2/number_lookup/'+input_number)  # sends API request using the standardized phone number
+            try:                                                                            # sends API request using the standardized phone number
+                res = requests.get('https://api.telnyx.com/anonymous/v2/number_lookup/'+input_number)  
                 normalized_data = pd.json_normalize(res.json())   
 
             except:
                 error_counter += 1                                                          # if API request does not go through, add 1 to the error counter and wait 65 seconds.
+                print("Trying Again...")
                 time.sleep(65)
                 continue                 
 
@@ -96,7 +134,7 @@ if __name__ == '__main__':
                 column_keys.append(column_name)
                 column_list = []
                 list_of_lists.append(column_list)
-                first = False
+                first = False                                                               
 
         for i in range(len(column_keys)):                                                   # this stores the normalized JSON data into a list of lists.
             
@@ -116,35 +154,9 @@ if __name__ == '__main__':
             print(str(counter) + ' Finished')
             time.sleep(63)         
 
-# =======================================================================================================================================================
-#                                                               Creating Output File
-# =======================================================================================================================================================
+        if counter%100 == 0:                                                                 # after every X number of entries, create an output CSV file
+            print('Creating CSV File...')  
+            output_creator()
+    
 
-    dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                       # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
-    dt_string = str(dt)                                                                     # string of date and time
-
-    extension = '.csv'                                          
-
-    file_name = dt_string +" "+ "telynyx_result"+ str(counter) + extension                  # sets the file name 
-
-    script_dir = os.path.dirname(__file__)                                                  # absolute directory the script is in
-    rel_path = 'Output'
-    abs_file_path = os.path.join(script_dir, rel_path)                                      # this joins the absolute path of current script with wanted relative path
-
-    drop_list = []
-
-    for i in range(len(csv_df.index)):                                                      # if the script ended prematurely, drop every phone numbers that were not used
-        if i > counter-1:
-            drop_list.append(i)
-                                                                 
-    csv_df.drop(drop_list)                                                                  # drops the indexes of phone numbers that were not used
-
-    for i in range(len(list_of_lists)):                                                     # this populates the actual json data into each column
-        csv_df[column_keys[i]] = list_of_lists[i]
-
-    csv_df = csv_df.applymap(str)
-
-    with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                    # creates csv to write in
-
-        csv_df.to_csv(new_file, index=False)                                                # writes the dataframe into the new file without the indices
-        csv_file.close()
+    output_creator()                                                                        # creates Final output csv after processing through all rows
