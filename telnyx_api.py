@@ -19,75 +19,75 @@ from pandas import json_normalize                                               
 import time                                                                                 # used to pause between API requests to not 
 
 
-if __name__ == '__main__':
-
 # =======================================================================================================================================================
 #                                                           Script lines for Tkinter GUI
 # =======================================================================================================================================================
 
-    window = tk.Tk()                                                                        # creates a tkinter object
-    window.geometry('200x200')                                                              # set size of tkinter window
+window = tk.Tk()                                                                            # creates a tkinter object
+window.geometry('200x200')                                                                  # set size of tkinter window
 
-    label = tk.Label(text='Telnyx Lookup')                                                  # sets the text to be dipslayed by tkinter
-    label.pack()
+label = tk.Label(text='Telnyx Lookup')                                                      # sets the text to be dipslayed by tkinter
+label.pack()
 
-    def csv_opener():
-        """ this function is used for the button to open the csv file """
-        global csv_name
-        global csv_file
-        global csv_df
-        csv_name = askopenfilename()                                                        # show an "Open" dialog box and return the path to the selected file
-        csv_file = open(csv_name, 'r')		                        
-        csv_data = pd.read_csv(csv_file)                                                    
-        csv_df = pd.DataFrame(csv_data)                                                     # creates a pandas dataframe using the input csv file
+def csv_opener():
+    """ this function is used for the button to open the csv file """
+    global csv_name
+    global csv_file
+    global csv_df
+    csv_name = askopenfilename()                                                            # show an "Open" dialog box and return the path to the selected file
+    csv_file = open(csv_name, 'r')		                        
+    csv_data = pd.read_csv(csv_file)                                                    
+    csv_df = pd.DataFrame(csv_data)                                                         # creates a pandas dataframe using the input csv file
 
-        end_button = Button(window, text = 'Create', command =window.destroy).pack()        # button to close tkinter window
-                                                                    
-    csv_button = Button(window, text = 'Open CSV File', command = csv_opener).pack()
+    end_button = Button(window, text = 'Create', command =window.destroy).pack()            # button to close tkinter window
 
-    window.mainloop()                                                                       # tells Python to run the Tkinter event loop
+csv_button = Button(window, text = 'Open CSV File', command = csv_opener).pack()
+
+window.mainloop()                                                                           # tells Python to run the Tkinter event loop
 
 # =======================================================================================================================================================
 #                                                         Function to create Output CSV file
 # =======================================================================================================================================================
 
 
-    def output_creator():
+def output_creator():
 
-        dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                   # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
-        dt_string = str(dt)                                                                 # string of date and time
-                    
-        last_path = os.path.basename(os.path.normpath(csv_file.name))                       # grabs the title of the csv file             
+    dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                   # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
+    dt_string = str(dt)                                                                 # string of date and time
 
-        file_name = dt_string +" Count_"+str(counter)+" "+last_path                         # sets the file name 
+    last_path = os.path.basename(os.path.normpath(csv_file.name))                       # grabs the title of the csv file             
 
-        script_dir = os.path.dirname(__file__)                                              # absolute directory the script is in
-        rel_path = 'Output'
-        abs_file_path = os.path.join(script_dir, rel_path)                                  # this joins the absolute path of current script with wanted relative path
+    file_name = dt_string +" Count_"+str(counter)+" "+last_path                         # sets the file name 
 
-        drop_list = []
+    script_dir = os.path.dirname(__file__)                                              # absolute directory the script is in
+    rel_path = 'Output'
+    abs_file_path = os.path.join(script_dir, rel_path)                                  # this joins the absolute path of current script with wanted relative path
 
-        csv_df_copy = csv_df.copy(deep=True)
+    drop_list = []
 
-        for i in range(len(csv_df_copy.index)):                                             # drop every phone numbers that were not used
-            if i > counter-1:
-                drop_list.append(i)
+    csv_df_copy = csv_df.copy(deep=True)
 
-        csv_df_copy = csv_df_copy.drop(drop_list)                                           # drops the indexes of phone numbers that were not used
+    for i in range(len(csv_df_copy.index)):                                             # drop every phone numbers that were not used
+        if i > counter-1:
+            drop_list.append(i)
 
-        for i in range(len(list_of_lists)):                                                 # this populates the actual json data into each column
-            csv_df_copy[column_keys[i]] = list_of_lists[i]                                                            
+    csv_df_copy = csv_df_copy.drop(drop_list)                                           # drops the indexes of phone numbers that were not used
 
-        csv_df_copy = csv_df_copy.applymap(str)
+    for i in range(len(list_of_lists)):                                                 # this populates the actual json data into each column
+        csv_df_copy[column_keys[i]] = list_of_lists[i]                                                            
 
-        with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                # creates csv to write in
+    csv_df_copy = csv_df_copy.applymap(str)
 
-            csv_df_copy.to_csv(new_file, index=False)                                       # writes the dataframe into the new file without the indices
-            csv_file.close()
+    with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                # creates csv to write in
+
+        csv_df_copy.to_csv(new_file, index=False)                                       # writes the dataframe into the new file without the indices
+        csv_file.close()
 
 # =======================================================================================================================================================
 #                                                 Section to send API request and collect JSON data
 # =======================================================================================================================================================
+
+def main():
 
     column_keys = []                                                                        # this list will be used to contain the column_keys from the JSON file
     list_of_lists = []                                                                      # this list will contain lists that each represent a column    
@@ -160,3 +160,9 @@ if __name__ == '__main__':
     
 
     output_creator()                                                                        # creates Final output csv after processing through all rows
+
+    
+if __name__ == '__main__':
+    main()
+    
+   
