@@ -52,35 +52,35 @@ window.mainloop()                                                               
 
 def output_creator():
 
-    dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                   # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
-    dt_string = str(dt)                                                                 # string of date and time
+    dt = datetime.now().strftime('%Y.%m.%d-%I%M%S%p')                                       # year_month_day-hours_minutes_seconds_AM/PM ; used in Title                            
+    dt_string = str(dt)                                                                     # string of date and time
 
-    last_path = os.path.basename(os.path.normpath(csv_file.name))                       # grabs the title of the csv file             
+    last_path = os.path.basename(os.path.normpath(csv_file.name))                           # grabs the title of the csv file             
 
-    file_name = dt_string +" Count_"+str(counter)+" "+last_path                         # sets the file name 
+    file_name = dt_string +" Count_"+str(counter)+" "+last_path                             # sets the file name 
 
-    script_dir = os.path.dirname(__file__)                                              # absolute directory the script is in
+    script_dir = os.path.dirname(__file__)                                                  # absolute directory the script is in
     rel_path = 'Output'
-    abs_file_path = os.path.join(script_dir, rel_path)                                  # this joins the absolute path of current script with wanted relative path
+    abs_file_path = os.path.join(script_dir, rel_path)                                      # this joins the absolute path of current script with wanted relative path
 
     drop_list = []
 
     csv_df_copy = csv_df.copy(deep=True)
 
-    for i in range(len(csv_df_copy.index)):                                             # drop every phone numbers that were not used
+    for i in range(len(csv_df_copy.index)):                                                 # drop every phone numbers that were not used
         if i > counter-1:
             drop_list.append(i)
 
-    csv_df_copy = csv_df_copy.drop(drop_list)                                           # drops the indexes of phone numbers that were not used
+    csv_df_copy = csv_df_copy.drop(drop_list)                                               # drops the indexes of phone numbers that were not used
 
-    for i in range(len(list_of_lists)):                                                 # this populates the actual json data into each column
+    for i in range(len(list_of_lists)):                                                     # this populates the actual json data into each column
         csv_df_copy[column_keys[i]] = list_of_lists[i]                                                            
 
     csv_df_copy = csv_df_copy.applymap(str)
 
-    with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                # creates csv to write in
+    with open(abs_file_path+'/'+file_name, 'w',newline='') as new_file:	                    # creates csv to write in
 
-        csv_df_copy.to_csv(new_file, index=False)                                       # writes the dataframe into the new file without the indices
+        csv_df_copy.to_csv(new_file, index=False)                                           # writes the dataframe into the new file without the indices
         csv_file.close()
 
 # =======================================================================================================================================================
@@ -154,7 +154,7 @@ def main():
             print(str(counter) + ' Finished')
             time.sleep(63)         
 
-        if counter%100 == 0:                                                                 # after every X number of entries, create an output CSV file
+        if counter%100 == 0:                                                                # after every X number of entries, create an output CSV file
             print('Creating CSV File...')  
             output_creator()
     
