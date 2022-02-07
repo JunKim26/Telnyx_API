@@ -5,19 +5,17 @@
 # The script will then run a loop that will send an API request to Telnyx to gather information about the phone numbers and write a CSV file with that information.
 # An output file is created every 1000 number of times. Line 157 is where the value is set.
 
-from typing import Counter
 import pandas as pd                                                                         # used to create dataframes
 import os                                                                                   # used to create relative path to write file
-from datetime import date                                                                   # used to get the current date
-from datetime import datetime                                                               # used to get date and time
-import tkinter as tk                                                                        # used as a user friendly tool for the program
-from tkinter.filedialog import askopenfilename                                              # used to open csv file
-from tkinter import StringVar                                                           
-from tkinter import *
 import requests                                                                             # used for API requests
 import json                                                                                 # used to work with JSON
-from pandas import json_normalize                                                           # used to normalize JSON data
 import time                                                                                 # used to pause between API requests to not 
+import tkinter as tk                                                                        # used as a user friendly tool for the program
+from tkinter import *
+from tkinter.filedialog import askopenfilename                                              # used to open csv file
+from pandas import json_normalize                                                           # used to normalize JSON data
+from datetime import datetime                                                               # used to get date and time
+from typing import Counter
 
 
 def main():
