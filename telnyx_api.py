@@ -19,9 +19,6 @@ from typing import Counter
 
 
 def main():
-'''
-Initialize Tkinter GUI
-'''
 
     window = tk.Tk()                                                                        
     window.geometry('200x200')                                                             
@@ -89,9 +86,6 @@ Initialize Tkinter GUI
 
             csv_df_copy.to_csv(new_file, index=False)                                       
             csv_file.close()
-
-
-    #Section to send API request and collect JSON data
 
 
     column_keys = []                                                                       
